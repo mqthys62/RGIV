@@ -1,0 +1,21 @@
+# Outils installés localement (ComfyUI, FaceFusion, venvs, modèles...) : jamais dans git
+outils/*
+!outils/.gitkeep
+
+# État propre à la machine (profil matériel, journal) : reste local
+etat/*
+!etat/README.md
+
+# Les photos / vidéos / voix perso et les rendus : JAMAIS sur GitHub
+projet/entrees/**
+!projet/entrees/*/
+!projet/entrees/*/.gitkeep
+projet/sorties/**
+!projet/sorties/.gitkeep
+
+# Divers
+__pycache__/
+*.pyc
+.venv/
+*.log
+.DS_Store

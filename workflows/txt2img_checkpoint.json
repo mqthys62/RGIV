@@ -1,0 +1,38 @@
+{
+  "4": {
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {"title": "Modèle (fichier dans outils/ComfyUI/models/checkpoints)"},
+    "inputs": {"ckpt_name": "A_REMPLACER.safetensors"}
+  },
+  "5": {
+    "class_type": "EmptyLatentImage",
+    "_meta": {"title": "Taille de l'image"},
+    "inputs": {"width": 1024, "height": 1024, "batch_size": 1}
+  },
+  "6": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {"title": "Prompt positif"},
+    "inputs": {"text": "a woman astronaut standing on the moon, cinematic photo, earth in the sky", "clip": ["4", 1]}
+  },
+  "7": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {"title": "Prompt négatif"},
+    "inputs": {"text": "blurry, low quality, deformed, extra fingers, watermark, text", "clip": ["4", 1]}
+  },
+  "3": {
+    "class_type": "KSampler",
+    "_meta": {"title": "Échantillonneur"},
+    "inputs": {
+      "seed": 1, "steps": 30, "cfg": 6.0, "sampler_name": "dpmpp_2m", "scheduler": "karras", "denoise": 1.0,
+      "model": ["4", 0], "positive": ["6", 0], "negative": ["7", 0], "latent_image": ["5", 0]
+    }
+  },
+  "8": {
+    "class_type": "VAEDecode",
+    "inputs": {"samples": ["3", 0], "vae": ["4", 2]}
+  },
+  "9": {
+    "class_type": "SaveImage",
+    "inputs": {"filename_prefix": "txt2img", "images": ["8", 0]}
+  }
+}
