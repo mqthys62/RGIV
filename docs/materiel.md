@@ -8,14 +8,30 @@
 | Carte mère | ASUS ROG STRIX B550-F GAMING (WI-FI), PCIe 4.0, 4 slots RAM (128 Go max) | Très bien, évolutive. |
 | BIOS | 1202 du 21/10/2020 | Ancien mais OK. Mise à jour pas nécessaire pour ce projet. |
 | RAM | 16 Go = 2 × 8 Go G.Skill F4-3200C16, **à 2133 MT/s** (slots A2 + B2) | **Le point faible.** Voir ci-dessous. |
-| Secure Boot | Activé | Une étape en plus pour le pilote NVIDIA (voir `fedora.md`). |
-| Carte graphique | **Non relevée** | **C'est elle qui décide de presque tout.** `scripts/detect_hardware.sh` la détecte. |
+| Secure Boot | Activé | Sans impact (carte AMD, pas de pilote à signer). |
+| Carte graphique | **AMD Radeon RX 6800 16 Go** (MSI Gaming X Trio, Navi 21 XL, `gfx1030`, RDNA2), PCIe 4.0 x16, ReBAR désactivé | Beaucoup de VRAM (palier 4), vitesse moyenne pour l'IA, passe par ROCm. Voir ci-dessous. |
+| Disques | NVMe Force MP510 480 Go · SSD Crucial MX500 1 To · HDD HGST 1 To en USB | Modèles sur SSD uniquement. |
 
 ### La RAM : deux actions possibles
 
 1. **Gratuit, 2 minutes — activer DOCP** : les barrettes sont prévues pour 3200 MT/s mais tournent à 2133. Au démarrage, touche **Suppr** → BIOS ASUS → touche **F7** (mode avancé) → **Ai Tweaker** → **Ai Overclock Tuner** → **D.O.C.P.** (choisir le profil 3200) → **F10** pour sauver. Si le PC ne redémarre pas (rare), il revient tout seul aux réglages d'avant après quelques tentatives.
 2. **Payant — passer à 32 Go** : 2 barrettes supplémentaires de 8 Go identiques (F4-3200C16-8GVKB) dans les slots A1 et B1, ou un kit 2 × 16 Go. Utile **surtout pour la vidéo en local** (Wan 14B, Hunyuan…), qui décharge une partie du modèle en RAM. Les prix de la DDR4 ont beaucoup bougé en 2025-2026 : vérifier les prix du moment avant de conseiller.
 3. En attendant : **ajouter du swap** (`sudo bash scripts/install/01_swap.sh`) évite les plantages « plus de mémoire » (en échange d'un peu de lenteur).
+
+## Sa carte : RX 6800 16 Go, concrètement
+
+| Usage | En local sur la RX 6800 | Remarque |
+|---|---|---|
+| Images (SDXL, Z-Image, Flux, Qwen-Image) | ✔ | Flux dev / Qwen en GGUF Q8 ou fp16 partiel : 30 s à 2 min par image |
+| Édition par référence (Qwen-Image-Edit, Kontext) | ✔ | En GGUF |
+| Face swap FaceFusion | ✔ si onnxruntime ROCm/MIGraphX marche, sinon **CPU** (5800X : OK pour des extraits courts) | Le point le plus incertain sous AMD : tester tôt |
+| Image→vidéo Wan 2.2 5B / LTX | ✔ | Quelques minutes à ~15 min par clip de 5 s |
+| Wan 2.2 14B (I2V/T2V) en GGUF + lightx2v | ✔ mais lent | ~10-30 min par clip de 5 s en 480p ; RAM 16 Go = swap conseillé |
+| Wan 2.2 Animate (remplacer un personnage) | ⚠ possible en GGUF, très lent | Bon candidat pour **louer une NVIDIA à l'heure** (2-3 €) |
+| Voix (Chatterbox, Applio) | ✔ | |
+| Whisper | CPU | Rapide quand même avec le 5800X (modèle `medium`) |
+
+Règle : tout ce qui est image et voix → local. Vidéo lourde (Wan 14B en série, Wan Animate, LoRA) → tester en local, et si c'est trop lent, **RunPod / Vast.ai**.
 
 ## Paliers selon la VRAM (mémoire de la carte graphique)
 

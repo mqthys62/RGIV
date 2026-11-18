@@ -41,8 +41,13 @@ Mets `etat/journal.md` à jour à chaque étape importante : installation réuss
 - **CPU** : AMD Ryzen 7 5800X (8 cœurs / 16 threads) → très bien
 - **Carte mère** : ASUS ROG STRIX B550-F GAMING (WI-FI), BIOS 1202 (2020), PCIe 4.0
 - **RAM** : **16 Go** (2 × 8 Go G.Skill F4-3200C16) mais qui tournaient à **2133 MT/s** → le profil **DOCP** (l'XMP d'ASUS) n'est pas activé dans le BIOS. L'activer = gratuit, +50 % de bande passante mémoire. 16 Go c'est **juste** pour les gros modèles vidéo (ils déchargent dans la RAM) : passer à 32 Go est l'upgrade la plus rentable si besoin.
-- **Secure Boot activé** → important pour le pilote NVIDIA sous Fedora (voir `docs/fedora.md`)
-- **Carte graphique : inconnue** (absente du relevé). C'est LE facteur décisif. Le script de détection fait foi.
+- **Carte graphique : AMD Radeon RX 6800 (MSI Gaming X Trio), 16 Go de VRAM GDDR6**, puce Navi 21 = `gfx1030` (RDNA2)
+  - 16 Go de VRAM = **palier 4** en capacité : presque tous les modèles rentrent (Flux, Qwen-Image, Wan 2.2 14B en GGUF/fp8, Wan Animate en GGUF).
+  - Mais c'est de l'**AMD RDNA2 → ROCm**, pas CUDA : en vitesse, compte plutôt un niveau RTX 3060 Ti-3070 pour l'IA (pas de fp8/bf16 matériel, pas de FlashAttention). Les rendus vidéo lourds seront **2 à 3× plus lents** qu'une NVIDIA de même VRAM. Certains outils marchent moins bien sous AMD (onnxruntime pour FaceFusion, ctranslate2 pour Whisper → CPU).
+  - Bonne nouvelle : le pilote `amdgpu` est déjà dans le noyau de Fedora → **pas de pilote à installer, pas de souci de Secure Boot**. `gfx1030` est supporté officiellement par ROCm : `HSA_OVERRIDE_GFX_VERSION=10.3.0` n'est normalement pas nécessaire (à tenter seulement si PyTorch ne voit pas la carte).
+  - **Resizable BAR désactivé** dans le BIOS (« Above 4G Decoding » + « Re-Size BAR Support » dans Advanced → PCI Subsystem Settings) : gain léger, à activer en même temps que DOCP.
+- **Disques** (sous Windows) : NVMe Corsair Force MP510 480 Go, SSD Crucial MX500 1 To (SATA), disque dur HGST 1 To en USB. Vérifie où Fedora est installé (`lsblk -f`, `df -h`) : les modèles (100-200 Go) doivent aller sur un **SSD**, jamais sur le disque dur USB (chargement des modèles beaucoup trop lent). Si le SSD de 1 To est libre, on peut y mettre `outils/`.
+- **Secure Boot activé** : sans impact avec une carte AMD.
 
 Détails, paliers de VRAM et ce qu'on peut faire à chaque palier : `docs/materiel.md`.
 
